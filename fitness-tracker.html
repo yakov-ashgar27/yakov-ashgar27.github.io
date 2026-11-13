@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fitness & Nutrition Tracking System | Yakov Ashgar</title>
+<meta name="description" content="Case study by Yakov Ashgar: end-to-end planning, systems analysis and architecture of a fitness and nutrition tracking system – requirements, data model, data flow and key insights.">
+<meta name="author" content="Yakov Ashgar">
+<link rel="canonical" href="https://yakov-ashgar27.github.io/fitness-tracker.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fitness & Nutrition Tracking System – Case Study">
+<meta property="og:description" content="Requirements, architecture, data model and insights from designing a fitness & nutrition tracking system.">
+<meta property="og:url" content="https://yakov-ashgar27.github.io/fitness-tracker.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --text: #212529; --muted: #6c757d; --accent: #b509ac;
+    --accent-soft: rgba(181, 9, 172, .08); --line: #e5e5e5; --card: #fafafa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1c1d; --text: #e8e8e8; --muted: #a0a0a0; --accent: #2698ba;
+      --accent-soft: rgba(38, 152, 186, .12); --line: #333; --card: #232325;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1c1d; --text: #e8e8e8; --muted: #a0a0a0; --accent: #2698ba;
+    --accent-soft: rgba(38, 152, 186, .12); --line: #333; --card: #232325;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Roboto", system-ui, sans-serif; font-weight: 300; line-height: 1.65; font-size: 16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .nav { max-width: 930px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; height: 56px; gap: 12px; }
+  .brand { color: var(--text); white-space: nowrap; }
+  .brand b { font-weight: 500; }
+  .nav ul { list-style: none; display: flex; gap: 18px; margin: 0; padding: 0; overflow-x: auto; }
+  .nav ul a { color: var(--text); font-size: 15px; }
+  .nav ul a:hover, .nav ul a.active { color: var(--accent); text-decoration: none; }
+  #theme { background: none; border: 0; color: var(--text); cursor: pointer; font-size: 18px; padding: 4px; }
+  @media (max-width: 680px) { .brand { display: none; } .nav ul { gap: 14px; } .nav ul a { font-size: 14px; } }
+
+  main { max-width: 930px; margin: 0 auto; padding: 28px 16px 64px; }
+  .back { font-size: 14px; }
+  h1 { font-size: 2.2rem; font-weight: 300; line-height: 1.2; margin: 14px 0 6px; }
+  h1 b { font-weight: 700; }
+  .lead { font-size: 1.1rem; color: var(--muted); margin: 0 0 22px; max-width: 720px; }
+  @media (max-width: 680px) { h1 { font-size: 1.7rem; } }
+
+  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 8px; }
+  .fact { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .fact .k { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .fact .v { font-weight: 500; font-size: 15px; }
+  @media (max-width: 680px) { .facts { grid-template-columns: 1fr 1fr; } }
+
+  h2 { font-weight: 400; font-size: 1.5rem; color: var(--accent); margin: 44px 0 14px; text-transform: lowercase; }
+  h3 { font-weight: 500; font-size: 1.05rem; margin: 0 0 4px; }
+  p { margin: 0 0 12px; }
+
+  /* problem / goals */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 680px) { .two { grid-template-columns: 1fr; } }
+  .panel { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .panel ul { margin: 6px 0 0; padding-left: 18px; }
+  .panel li { margin: 4px 0; }
+
+  /* process timeline */
+  .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; counter-reset: s; }
+  .step { position: relative; border-top: 3px solid var(--accent); padding-top: 10px; }
+  .step::before { counter-increment: s; content: "0" counter(s); font-size: 13px; font-weight: 700; color: var(--accent); }
+  .step h3 { margin-top: 2px; }
+  .step p { font-size: 14px; color: var(--muted); margin: 0; }
+  @media (max-width: 760px) {
+    .steps { grid-template-columns: 1fr; gap: 0; }
+    .step { border-top: 0; border-left: 3px solid var(--accent); padding: 4px 0 14px 14px; }
+  }
+
+  /* architecture diagram */
+  .arch { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--card); }
+  .layer { display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: center; }
+  .layer-name { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+  .boxes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .box { flex: 1 1 140px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .box b { display: block; font-weight: 500; }
+  .box span { color: var(--muted); font-size: 13px; }
+  .layer.ui .box { border-color: var(--accent); }
+  .layer.logic .box { background: var(--accent-soft); }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--muted); font-size: 13px; padding: 8px 0; }
+  .flow .arrow { font-size: 20px; color: var(--accent); line-height: 1; }
+  @media (max-width: 680px) { .layer { grid-template-columns: 1fr; gap: 6px; } }
+
+  /* data model */
+  .erd { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 680px) { .erd { grid-template-columns: 1fr 1fr; } }
+  .entity { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: 13px; }
+  .entity .t { background: var(--accent); color: #fff; font-weight: 500; padding: 6px 10px; font-size: 14px; }
+  .entity ul { list-style: none; margin: 0; padding: 6px 10px 8px; }
+  .entity li { padding: 2px 0; color: var(--muted); }
+  .entity li.pk { color: var(--text); font-weight: 500; }
+  .rels { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .rel { font-size: 13px; border: 1px dashed var(--line); border-radius: 999px; padding: 3px 12px; }
+  .rel b { color: var(--accent); font-weight: 500; }
+
+  /* insights */
+  .insights { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 680px) { .insights { grid-template-columns: 1fr; } }
+  .insight { border-left: 3px solid var(--accent); background: var(--card); border-radius: 0 8px 8px 0; padding: 12px 16px; }
+  .insight p { margin: 0; font-size: 15px; }
+
+  /* roadmap */
+  .road { display: grid; gap: 10px; }
+  .road .item { display: grid; grid-template-columns: 110px 1fr; gap: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+  .road .tag { font-size: 12px; font-weight: 500; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; padding-top: 3px; }
+  @media (max-width: 680px) { .road .item { grid-template-columns: 1fr; gap: 2px; } }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 2px 12px; font-size: 14px; }
+
+  .cta { margin-top: 48px; text-align: center; border: 1px solid var(--line); border-radius: 12px; padding: 22px 16px; }
+  .cta p { margin: 0 0 6px; }
+  footer { border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 13px; padding: 18px 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a class="brand" href="index.html"><b>Yakov</b> Ashgar</a>
+    <ul>
+      <li><a href="index.html#about">about</a></li>
+      <li><a class="active" href="index.html#projects">projects</a></li>
+      <li><a href="index.html#education">education</a></li>
+      <li><a href="index.html#experience">experience</a></li>
+      <li><a href="index.html#skills">skills</a></li>
+    </ul>
+    <button id="theme" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
+  </nav>
+</header>
+
+<main>
+  <a class="back" href="index.html#projects">← back to projects</a>
+  <h1><b>Fitness &amp; Nutrition</b> Tracking System</h1>
+  <p class="lead">A case study in taking a product idea from user needs to a complete system design: requirements, architecture, data model and the trade-offs in between.</p>
+
+  <div class="facts">
+    <div class="fact"><div class="k">Year</div><div class="v">2024</div></div>
+    <div class="fact"><div class="k">My role</div><div class="v">Lead – planning &amp; design</div></div>
+    <div class="fact"><div class="k">Scope</div><div class="v">End-to-end</div></div>
+    <div class="fact"><div class="k">Focus</div><div class="v">Systems analysis</div></div>
+  </div>
+
+  <!-- IDEA -->
+  <h2>the idea</h2>
+  <div class="two">
+    <div class="panel">
+      <h3>The problem</h3>
+      <p>People who train and watch their nutrition usually track workouts in one place, meals in another, and progress in their head. The data exists, but it is scattered, so it is hard to see what is actually working.</p>
+    </div>
+    <div class="panel">
+      <h3>The goal</h3>
+      <ul>
+        <li>One system for logging workouts and meals</li>
+        <li>Clear, automatic view of progress over time</li>
+        <li>Personal goals the system can measure against</li>
+        <li>A structure that stays fast as data grows</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PROCESS -->
+  <h2>process</h2>
+  <div class="steps">
+    <div class="step"><h3>Requirements</h3><p>Defined user needs and operational requirements before any design.</p></div>
+    <div class="step"><h3>Analysis</h3><p>Mapped user flows and the information each screen needs.</p></div>
+    <div class="step"><h3>Architecture</h3><p>Split the system into interface, processing and data layers.</p></div>
+    <div class="step"><h3>Data design</h3><p>Built the data structure and the flow between modules.</p></div>
+    <div class="step"><h3>Gap analysis</h3><p>Checked the design against technical constraints and performance needs.</p></div>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <h2>system architecture</h2>
+  <p>The system is built in three layers, so each part has one job and data moves in a predictable direction.</p>
+  <div class="arch" role="img" aria-label="Three-layer architecture: user interface, processing modules, data layer">
+    <div class="layer ui">
+      <div class="layer-name">User interface</div>
+      <div class="boxes">
+        <div class="box"><b>Workout log</b><span>exercises, sets, reps</span></div>
+        <div class="box"><b>Meal log</b><span>foods &amp; portions</span></div>
+        <div class="box"><b>Progress dashboard</b><span>trends &amp; goals</span></div>
+      </div>
+    </div>
+    <div class="flow"><span class="arrow">↓</span> user input &nbsp;·&nbsp; results <span class="arrow">↑</span></div>
+    <div class="layer logic">
+      <div class="layer-name">Processing modules</div>
+      <div class="boxes">
+        <div class="box"><b>Nutrition calculation</b><span>calories &amp; macros</span></div>
+        <div class="box"><b>Progress tracking</b><span>aggregates over time</span></div>
+        <div class="box"><b>Goal evaluation</b><span>actual vs. target</span></div>
+      </div>
+    </div>
+    <div class="flow"><span class="arrow">↓</span> read / write <span class="arrow">↑</span></div>
+    <div class="layer data">
+      <div class="layer-name">Data layer</div>
+      <div class="boxes">
+        <div class="box"><b>Relational database</b><span>users, activity, nutrition, goals</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA MODEL -->
+  <h2>data model</h2>
+  <p>The core entities and how they connect. Separating the catalog data (exercises, foods) from the user's log entries keeps the logs small and the reference data reusable.</p>
+  <div class="erd">
+    <div class="entity"><div class="t">User</div><ul><li class="pk">user_id</li><li>profile</li><li>body metrics</li></ul></div>
+    <div class="entity"><div class="t">Workout</div><ul><li class="pk">workout_id</li><li>user_id</li><li>date, duration</li></ul></div>
+    <div class="entity"><div class="t">Exercise</div><ul><li class="pk">exercise_id</li><li>name, muscle group</li></ul></div>
+    <div class="entity"><div class="t">Meal</div><ul><li class="pk">meal_id</li><li>user_id</li><li>date, type</li></ul></div>
+    <div class="entity"><div class="t">Food</div><ul><li class="pk">food_id</li><li>calories, macros</li></ul></div>
+    <div class="entity"><div class="t">Goal</div><ul><li class="pk">goal_id</li><li>user_id</li><li>target, deadline</li></ul></div>
+  </div>
+  <div class="rels">
+    <span class="rel">User <b>1 : N</b> Workout</span>
+    <span class="rel">Workout <b>N : M</b> Exercise</span>
+    <span class="rel">User <b>1 : N</b> Meal</span>
+    <span class="rel">Meal <b>N : M</b> Food</span>
+    <span class="rel">User <b>1 : N</b> Goal</span>
+  </div>
+
+  <!-- INSIGHTS -->
+  <h2>key insights</h2>
+  <div class="insights">
+    <div class="insight"><h3>Requirements first saves rework</h3><p>Defining what users and operations actually need before designing meant the architecture answered real questions instead of guessed ones.</p></div>
+    <div class="insight"><h3>The data model drives everything</h3><p>Once the entities and relationships were right, the screens and the processing logic followed naturally from them.</p></div>
+    <div class="insight"><h3>Constraints are design inputs</h3><p>The gap analysis showed that performance limits should shape the design early, not be patched in at the end.</p></div>
+    <div class="insight"><h3>Clear layers, clear ownership</h3><p>Separating interface, logic and data makes each part easier to reason about, test and change on its own.</p></div>
+  </div>
+
+  <!-- ROADMAP -->
+  <h2>what's next</h2>
+  <div class="road">
+    <div class="item"><div class="tag">AI</div><div>Personalized recommendations for meals and training, built on the user's own history – connecting the project to my AI specialization.</div></div>
+    <div class="item"><div class="tag">Insights</div><div>Detecting patterns automatically, like which habits correlate with progress toward a goal.</div></div>
+    <div class="item"><div class="tag">Integration</div><div>Importing data from wearables and fitness apps to reduce manual logging.</div></div>
+  </div>
+
+  <!-- SKILLS -->
+  <h2>skills applied</h2>
+  <div class="chips">
+    <span class="chip">Requirements analysis</span><span class="chip">SDLC</span><span class="chip">System architecture</span>
+    <span class="chip">Data modeling</span><span class="chip">Relational databases</span><span class="chip">Gap analysis</span>
+    <span class="chip">Performance planning</span>
+  </div>
+
+  <div class="cta">
+    <p>Want to talk about this project?</p>
+    <a href="mailto:ykhn563@gmail.com">ykhn563 [at] gmail.com</a> &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/yakov-ashgar-650271392">LinkedIn</a>
+  </div>
+</main>
+
+<footer>© 2026 Yakov Ashgar · Hosted on GitHub Pages</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    try { var t = localStorage.getItem('theme'); if (t) root.setAttribute('data-theme', t); } catch (e) {}
+    document.getElementById('theme').addEventListener('click', function () {
+      var dark = root.getAttribute('data-theme') === 'dark' ||
+        (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var next = dark ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+  })();
+</script>
+</body>
+</html>
