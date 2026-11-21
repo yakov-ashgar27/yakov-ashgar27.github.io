@@ -314,6 +314,7 @@
         <li>Every claim in the answer carries a number like [2]</li>
         <li>Click it, and the exact lines open with a link to them on GitHub</li>
         <li>If the code doesn't say, it says so. No made-up features</li>
+        <li>Attach a job description, a CV or a whole folder, and it connects them to the projects</li>
       </ul>
     </div>
   </div>
@@ -328,7 +329,7 @@
   </div>
 
   <h2>a search engine from scratch</h2>
-  <p>I could have used a vector database and an embedding model. For about 600 passages full of exact identifiers like <code>find_path_step</code> or <code>RBAC</code>, plain keyword ranking is faster, needs no model download, and is easy to explain. The interesting part was making it understand both of my languages:</p>
+  <p>I could have used a vector database and an embedding model. For about 7,000 passages full of exact identifiers like <code>find_path_step</code> or <code>RBAC</code>, plain keyword ranking is faster, needs no model download, and is easy to explain. The interesting part was making it understand both of my languages:</p>
   <div class="role">
     <div class="r"><b>Code-aware</b><span><code>findPathStep</code> also counts as <i>find</i>, <i>path</i> and <i>step</i>, and <code>chase_range</code> as <i>chase</i> and <i>range</i>.</span></div>
     <div class="r"><b>Hebrew-aware</b><span>Hebrew glues words together: “והאויבים” also searches for “האויבים” and “אויבים”.</span></div>
@@ -337,6 +338,22 @@
   </div>
 <pre class="code"><span class="c"># BM25: rare words that appear often in a short passage score highest</span>
 score += idf(term) * tf * (K1 + 1) / (tf + K1 * (1 - B + B * length / avg_length))</pre>
+
+  <h2>it reads the code, not just the words</h2>
+  <p>People don't ask in the code's words. They ask "who calls this?", "what does it depend on?", "how do I run it?". So on every push yakov.LLM reads the code itself and writes a fact card for everything in it. Nothing is written by hand, so nothing goes stale.</p>
+  <div class="role">
+    <div class="r"><b>Every function and class</b><span>Its signature, docstring, file and lines, what it calls and where it is used. Python is parsed with <code>ast</code>; JavaScript, TypeScript and Java with careful patterns.</span></div>
+    <div class="r"><b>Every file</b><span>Its role, what it defines and what it imports.</span></div>
+    <div class="r"><b>Every project</b><span>Dependencies, run commands, tests and CI, API endpoints, database tables, settings and folder structure.</span></div>
+    <div class="r"><b>Tested at scale</b><span>750 auto-generated questions about random functions and files, in Hebrew and English. 95% reach the right file; the misses are names like <code>__init__</code> that are ambiguous by nature.</span></div>
+  </div>
+
+  <h2>it remembers, carefully</h2>
+  <p>Talk to it today and come back next week, and it remembers what you asked about. What visitors tell it is a different matter: a claim from a stranger is not a fact about my code.</p>
+  <div class="role">
+    <div class="r"><b>Separate from knowledge</b><span>The knowledge base is built only from the repos. What people say goes to a separate store, marked unverified, for me to read.</span></div>
+    <div class="r"><b>A name proves nothing</b><span>On the same device it recalls the whole conversation. Someone on another device who uses the same name only hears that a person by that name talked before, never what was said.</span></div>
+  </div>
 
   <h2>it keeps itself up to date</h2>
   <p>A portfolio assistant that forgets my latest work is worse than none. yakov.LLM compares every repo's last push time with what it already knows, and re-reads only what changed. There are three ways it hears about a change:</p>
@@ -348,12 +365,12 @@ score += idf(term) * tf * (K1 + 1) / (tf + K1 * (1 - B + B * length / avg_length
   </div>
 
   <h2>measured, not guessed</h2>
-  <p>I wrote 38 questions with known answers, 20 in Hebrew and 18 in English, and score the search on every change. A question is a hit when the file that holds the answer is in the top five results.</p>
+  <p>I wrote 38 questions with known answers, 20 in Hebrew and 18 in English, and score the search over all 11 projects on every change. A question is a hit when the file that holds the answer is in the top five results.</p>
   <div class="stats" style="margin-top:0">
-    <div class="stat"><div class="n">87%</div><div class="l">of questions find the right file in the top 5</div></div>
-    <div class="stat"><div class="n">70→85%</div><div class="l">Hebrew questions, before and after the bilingual glossary</div></div>
+    <div class="stat"><div class="n">89%</div><div class="l">of questions find the right file in the top 5</div></div>
+    <div class="stat"><div class="n">75→95%</div><div class="l">Hebrew questions, before and after the bilingual glossary</div></div>
     <div class="stat"><div class="n">&lt;1 ms</div><div class="l">per search, in Python or in the browser</div></div>
-    <div class="stat"><div class="n">26</div><div class="l">automated tests, plus a guard that fails CI if accuracy drops</div></div>
+    <div class="stat"><div class="n">43</div><div class="l">automated tests, plus guards that fail CI if accuracy drops</div></div>
   </div>
   <ul class="plain" style="margin-top:14px">
     <li>The same search engine runs in <b>Python</b> on the server and in <b>JavaScript</b> in the browser. A test runs both on every question and requires identical results.</li>
@@ -371,7 +388,7 @@ score += idf(term) * tf * (K1 + 1) / (tf + K1 * (1 - B + B * length / avg_length
 
   <h2>tech stack</h2>
   <div class="chips">
-    <span class="chip">Python (standard library)</span><span class="chip">BM25</span><span class="chip">RAG</span><span class="chip">Gemini · Groq · Claude APIs</span><span class="chip">Server-Sent Events</span><span class="chip">Vanilla JavaScript</span><span class="chip">PWA &amp; service worker</span><span class="chip">GitHub Actions</span><span class="chip">GitHub Pages</span><span class="chip">Docker · Render</span><span class="chip">pytest · Playwright</span>
+    <span class="chip">Python (standard library)</span><span class="chip">BM25</span><span class="chip">RAG</span><span class="chip">Gemini · Groq · Claude APIs</span><span class="chip">Server-Sent Events</span><span class="chip">Vanilla JavaScript</span><span class="chip">PWA &amp; service worker</span><span class="chip">GitHub Actions</span><span class="chip">GitHub Pages</span><span class="chip">Docker · Render</span><span class="chip">Python ast</span><span class="chip">Word · PDF · PowerPoint parsing</span><span class="chip">pytest · Playwright</span>
   </div>
 
   <div class="nextp">
