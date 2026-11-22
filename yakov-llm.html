@@ -346,7 +346,7 @@ score += idf(term) * tf * (K1 + 1) / (tf + K1 * (1 - B + B * length / avg_length
     <div class="r"><b>Every function and class</b><span>Its signature, docstring, file and lines, what it calls and where it is used. Python is parsed with <code>ast</code>; JavaScript, TypeScript and Java with careful patterns.</span></div>
     <div class="r"><b>Every file</b><span>Its role, what it defines and what it imports.</span></div>
     <div class="r"><b>Every project</b><span>Dependencies, run commands, tests and CI, API endpoints, database tables, settings and folder structure.</span></div>
-    <div class="r"><b>Tested at scale</b><span>750 auto-generated questions about random functions and files, in Hebrew and English. 95% reach the right file; the misses are names like <code>__init__</code> that are ambiguous by nature.</span></div>
+    <div class="r"><b>Tested at scale</b><span>750 auto-generated questions about random functions and files, in Hebrew and English. 93% reach the right file; the misses are names like <code>__init__</code> that are ambiguous by nature.</span></div>
   </div>
 
   <h2>it remembers, carefully</h2>
@@ -371,7 +371,7 @@ score += idf(term) * tf * (K1 + 1) / (tf + K1 * (1 - B + B * length / avg_length
     <div class="stat"><div class="n">89%</div><div class="l">of questions find the right file in the top 5</div></div>
     <div class="stat"><div class="n">75→95%</div><div class="l">Hebrew questions, before and after the bilingual glossary</div></div>
     <div class="stat"><div class="n">&lt;1 ms</div><div class="l">per search, in Python or in the browser</div></div>
-    <div class="stat"><div class="n">46</div><div class="l">automated tests, plus guards that fail CI if accuracy drops</div></div>
+    <div class="stat"><div class="n">50</div><div class="l">automated tests, plus guards that fail CI if accuracy drops</div></div>
   </div>
   <ul class="plain" style="margin-top:14px">
     <li>The same search engine runs in <b>Python</b> on the server and in <b>JavaScript</b> in the browser. A test runs both on every question and requires identical results.</li>
